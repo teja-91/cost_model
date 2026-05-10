@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Master Financial Plan: India vs. UK Transition</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --ind-color: #0ea5e9;
+            --uk-color: #8b5cf6;
+            --nps-color: #f97316;
+            --ssy-color: #ec4899;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-light: #475569;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --success: #10b981;
+            --success-bg: #f0fdf4;
+        }
+        
+        /* Hide content by default for password protection */
+        #protected-content { display: none; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .intro-header { text-align: center; margin-bottom: 20px; }
+        .intro-header h1 { font-size: 2.2rem; color: #1e293b; margin-bottom: 8px; }
+        .intro-header p { font-size: 1.05rem; color: var(--text-light); max-width: 800px; margin: 0 auto; }
+        
+        .guide-section {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 30px;
+            border-top: 5px solid #334155;
+        }
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 900px) { .guide-grid { grid-template-columns: 1fr; } }
+        .guide-col h3 { margin-top: 0; color: #1e293b; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .guide-col h4 { margin: 15px 0 5px 0; color: #334155; font-size: 15px; }
+        .guide-col p { font-size: 14px; color: var(--text-light); margin-bottom: 10px; }
+        .guide-col ul { padding-left: 20px; font-size: 14px; color: var(--text-light); margin-bottom: 15px;}
+        .guide-col li { margin-bottom: 6px; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1000px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        
+        .panel {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            margin: 20px 0 10px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 4px;
+            font-weight: bold;
+        }
+        .control-group { margin-bottom: 14px; position: relative; }
+        label {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-light);
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 2px;
+            accent-color: #475569;
+        }
+        .value-display {
+            font-size: 12px;
+            color: var(--text);
+            font-weight: bold;
+            margin-left: auto;
+        }
+
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+            color: #0f172a;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 6px;
+            cursor: help;
+            position: relative;
+        }
+        .tooltip-icon:hover { background-color: #94a3b8; }
+        .tooltip-icon::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 150%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: normal;
+            white-space: normal;
+            width: max-content;
+            max-width: 220px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .tooltip-icon:hover::after { opacity: 1; visibility: visible; }
+
+        .objectives-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .scenario-card { padding: 20px; border-radius: 10px; border: 2px solid transparent; }
+        .scenario-card.ind { background-color: #f0f9ff; border-color: #bae6fd; }
+        .scenario-card.uk { background-color: #f5f3ff; border-color: #ddd6fe; }
+        .scenario-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        
+        .mini-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .mini-metric {
+            background: white; padding: 12px 10px; border-radius: 8px;
+            text-align: center; border: 1px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center;
+        }
+        .mini-metric.danger { background-color: var(--danger-bg); border-color: #fca5a5; }
+        .mini-metric.success { background-color: var(--success-bg); border-color: #86efac; }
+        .mini-metric-title { font-size: 11px; color: var(--text-light); margin-bottom: 6px; }
+        .mini-metric-value { font-size: 15px; font-weight: bold; color: var(--text); }
+        .value-danger { color: var(--danger); }
+        .value-success { color: var(--success); }
+
+        .chart-wrapper { position: relative; height: 550px; width: 100%; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+        th { background-color: #f8fafc; color: var(--text-light); font-weight: 600; }
+        
+        .disclaimer { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<script>
+    const auth = prompt("Please enter the password to view the Financial Master Plan:");
+    if (auth === "cambridge") {
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('protected-content').style.display = 'block';
+            updateDashboard(); // Initialize chart
+        });
+    } else {
+        alert("Incorrect password. Access denied.");
+        document.body.innerHTML = "<h1 style='text-align:center; margin-top:100px; color:#ef4444;'>🔒 Access Denied</h1>";
+    }
+</script>
+
+<div id="protected-content">
+    <div class="container">
+        <div class="intro-header">
+            <h1>The Master Financial Plan v4.3</h1>
+            <p>A comprehensive 26-year simulation mapping Income, Expenses, Education, and Compounding Wealth.</p>
+        </div>
+
+        <div class="guide-section">
+            <div class="guide-grid">
+                <div class="guide-col">
+                    <h3>Purpose & Assumptions</h3>
+                    <p>Can an Indian household afford two kids in premium international schools and a ₹2.5 Cr home purely on a domestic salary? This model compares staying in India vs. a strategic UK stint.</p>
+                    <ul>
+                        <li><strong>Path A:</strong> Career in India. High private school costs start immediately.</li>
+                        <li><strong>Path B:</strong> 1-10 years in the UK. Utilizes free state schools and GBP savings.</li>
+                        <li><strong>The Core Rule:</strong> 20% of income is mandatorily invested. If expenses exceed the other 80%, Liquid Investments are raided. Liquid hit zero = <strong>Fail</strong>.</li>
+                    </ul>
+                </div>
+                <div class="guide-col">
+                    <h3>Visualization Guide</h3>
+                    <p><strong>Yellow Line:</strong> Education costs. Path B stays flat initially (UK school savings).<br>
+                    <strong>Red Line:</strong> Total Expenses. Watch for the vertical jump at the Home Purchase Year.<br>
+                    <strong>Dashed Orange/Pink:</strong> NPS and SSY. This wealth is locked. High "Total Wealth" doesn't help if your liquid bank balance hits zero.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="panel controls">
+                <div class="section-title">Global Rates & Returns</div>
+                <div class="control-group">
+                    <label>Salary Growth (IN) <span id="val-salGr" class="value-display">10%</span></label>
+                    <input type="range" id="salGr" min="5" max="15" value="10" step="1" oninput="updatePct('salGr', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>Edu Inflation <span id="val-eduInf" class="value-display">10%</span></label>
+                    <input type="range" id="eduInf" min="5" max="15" value="10" step="1" oninput="updatePct('eduInf', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>Living Exp Inflation <span id="val-expInf" class="value-display">7%</span></label>
+                    <input type="range" id="expInf" min="4" max="12" value="7" step="1" oninput="updatePct('expInf', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>Liquid Return (CAGR) <span id="val-invRet" class="value-display">12%</span></label>
+                    <input type="range" id="invRet" min="5" max="20" value="12" step="1" oninput="updatePct('invRet', this.value); updateDashboard();">
+                </div>
+
+                <div class="section-title">Dedicated Funds (Locked)</div>
+                <div class="control-group">
+                    <label>NPS Annual Cont. <span id="val-npsCont" class="value-display">50 K</span></label>
+                    <input type="range" id="npsCont" min="0" max="500000" value="50000" step="10000" oninput="updateCur('npsCont', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>NPS Return (CAGR) <span id="val-npsRet" class="value-display">10%</span></label>
+                    <input type="range" id="npsRet" min="5" max="15" value="10" step="1" oninput="updatePct('npsRet', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>SSY Annual Cont. <span id="val-ssyCont" class="value-display">1.5 L</span></label>
+                    <input type="range" id="ssyCont" min="0" max="150000" value="150000" step="10000" oninput="updateCur('ssyCont', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>SSY Return (Fixed) <span id="val-ssyRet" class="value-display">8.2%</span></label>
+                    <input type="range" id="ssyRet" min="5" max="12" value="8.2" step="0.1" oninput="updatePct('ssyRet', this.value); updateDashboard();">
+                </div>
+
+                <div class="section-title">Housing & India Params</div>
+                <div class="control-group">
+                    <label>Home Value (Today) <span id="val-homeVal" class="value-display">2.50 Cr</span></label>
+                    <input type="range" id="homeVal" min="10000000" max="50000000" value="25000000" step="1000000" oninput="updateCur('homeVal', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>Purchase Year <span id="val-homeYear" class="value-display">Year 5</span></label>
+                    <input type="range" id="homeYear" min="1" max="15" value="5" step="1" oninput="updateVal('homeYear', 'Year ' + this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>India Base Sal <span id="val-indSalBase" class="value-display">30 L</span></label>
+                    <input type="range" id="indSalBase" min="2000000" max="8000000" value="3000000" step="100000" oninput="updateCur('indSalBase', this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>School Fee (per kid) <span id="val-indSch" class="value-display">12 L</span></label>
+                    <input type="range" id="indSch" min="100000" max="2500000" value="1200000" step="50000" oninput="updateCur('indSch', this.value); updateDashboard();">
+                </div>
+
+                <div class="section-title">UK Stint</div>
+                <div class="control-group">
+                    <label>Return Year <span id="val-ukRetYear" class="value-display">Year 3</span></label>
+                    <input type="range" id="ukRetYear" min="1" max="10" value="3" step="1" oninput="updateVal('ukRetYear', 'Year ' + this.value); updateDashboard();">
+                </div>
+                <div class="control-group">
+                    <label>UK Annual Base <span id="val-ukSal" class="value-display">£ 70,000</span></label>
+                    <input type="range" id="ukSal" min="50000" max="150000" value="70000" step="5000" oninput="updateVal('ukSal', '£ ' + parseInt(this.value).toLocaleString()); updateDashboard();">
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="objectives-grid">
+                    <div class="scenario-card ind">
+                        <div class="scenario-title">Path A: India Only</div>
+                        <div class="mini-metrics">
+                            <div class="mini-metric" id="box1-ind"><div class="mini-metric-title">Status</div><div class="mini-metric-value" id="val-status-ind">-</div></div>
+                            <div class="mini-metric"><div class="mini-metric-title">Max EMI Burden</div><div class="mini-metric-value" id="val-emi-ind">-</div></div>
+                            <div class="mini-metric"><div class="mini-metric-title">Final Worth</div><div class="mini-metric-value" id="val-nw-ind">-</div></div>
+                        </div>
+                    </div>
+                    <div class="scenario-card uk">
+                        <div class="scenario-title">Path B: UK -> India</div>
+                        <div class="mini-metrics">
+                            <div class="mini-metric" id="box1-uk"><div class="mini-metric-title">Status</div><div class="mini-metric-value" id="val-status-uk">-</div></div>
+                            <div class="mini-metric"><div class="mini-metric-title">Max EMI Burden</div><div class="mini-metric-value" id="val-emi-uk">-</div></div>
+                            <div class="mini-metric"><div class="mini-metric-title">Final Worth</div><div class="mini-metric-value" id="val-nw-uk">-</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper"><canvas id="comparisonChart"></canvas></div>
+
+                <table>
+                    <thead><tr><th>Metric</th><th>India Only</th><th>UK -> India</th></tr></thead>
+                    <tbody>
+                        <tr><td>Total Education Cost</td><td id="tbl-edu-ind">-</td><td id="tbl-edu-uk">-</td></tr>
+                        <tr><td>Lowest Liquid Corpus</td><td id="tbl-low-ind">-</td><td id="tbl-low-uk">-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="disclaimer">Simulations are mathematical projections. Real returns may vary.</div>
+    </div>
+</div>
+
+<script>
+    let chartInstance = null;
+    const GBP_TO_INR = 105;
+    const IND_BONUS = 0.20;
+    const UK_BONUS = 0.10;
+
+    const formatINR = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+    const formatCrLakh = (num) => {
+        let absNum = Math.abs(num);
+        let prefix = num < 0 ? "- " : "";
+        if (absNum >= 10000000) return prefix + (absNum / 10000000).toFixed(2) + ' Cr';
+        if (absNum >= 100000) return prefix + (absNum / 100000).toFixed(1) + ' L';
+        return prefix + formatINR(absNum);
+    };
+
+    function updateVal(id, val) { document.getElementById(`val-${id}`).innerText = val; }
+    function updatePct(id, val) { document.getElementById(`val-${id}`).innerText = val + "%"; }
+    function updateCur(id, val) { document.getElementById(`val-${id}`).innerText = formatCrLakh(parseFloat(val)); }
+    function updateMonthly(id, val) { document.getElementById(`val-${id}`).innerText = (parseFloat(val)/100000).toFixed(2) + " L"; }
+
+    function calculateEMI(principal, annualRate, years) {
+        let r = annualRate / 12 / 100;
+        let n = years * 12;
+        return ((principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)) * 12;
+    }
+
+    function getEduCost(age, baseSchool) {
+        if (age >= 6 && age <= 17) return baseSchool;
+        if (age >= 18 && age <= 22) return 1000000;
+        return age >= 3 ? 150000 : 0;
+    }
+
+    function updateDashboard() {
+        const salGr = parseFloat(document.getElementById('salGr').value)/100;
+        const eduInf = parseFloat(document.getElementById('eduInf').value)/100;
+        const expInf = parseFloat(document.getElementById('expInf').value)/100;
+        const investReturn = parseFloat(document.getElementById('invRet').value)/100;
+        const npsCont = parseFloat(document.getElementById('npsCont').value);
+        const ssyCont = parseFloat(document.getElementById('ssyCont').value);
+        const npsRate = parseFloat(document.getElementById('npsRet').value)/100;
+        const ssyRate = parseFloat(document.getElementById('ssyRet').value)/100;
+        const homeValBase = parseFloat(document.getElementById('homeVal').value);
+        const homeYearIdx = parseInt(document.getElementById('homeYear').value) - 1;
+        const indSalBase = parseFloat(document.getElementById('indSalBase').value);
+        const indSchBase = parseFloat(document.getElementById('indSch').value);
+        const ukRetYear = parseInt(document.getElementById('ukRetYear').value);
+        const ukSal = parseFloat(document.getElementById('ukSal').value);
+
+        const labels = [], totalNetWorthInd = [], totalNetWorthUk = [], npsLine = [], ssyLine = [];
+        const incIndData = [], expIndData = [], eduIndData = [], incUkData = [], expUkData = [], eduUkData = [];
+
+        let cInd = 0, cUk = 0, npsVal = 0, ssyVal = 0, minCInd = Infinity, minCUk = Infinity, maxEmiInd = 0, maxEmiUk = 0, totalEduA = 0, totalEduB = 0;
+
+        for (let i = 0; i < 26; i++) {
+            labels.push(`Yr ${i+1}`);
+            npsVal = (npsVal + npsCont) * (1 + npsRate);
+            ssyVal = (ssyVal + (i < 15 ? ssyCont : 0)) * (1 + ssyRate);
+            npsLine.push(npsVal); ssyLine.push(ssyVal);
+
+            let futureHomeVal = homeValBase * Math.pow(1.05, homeYearIdx);
+            let emi = calculateEMI(futureHomeVal * 0.8, 8.5, 20);
+
+            // Path A
+            let incA = indSalBase * Math.pow(1+salGr, i) * 1.2;
+            let eduA = (getEduCost(4+i, indSchBase) + getEduCost(i, indSchBase)) * Math.pow(1+eduInf, i);
+            totalEduA += eduA;
+            let expA = eduA + (1.1e5*12 * Math.pow(1+expInf, i));
+            if (i === homeYearIdx) cInd -= futureHomeVal * 0.2;
+            if (i >= homeYearIdx && i < homeYearIdx+20) { expA += emi; maxEmiInd = Math.max(maxEmiInd, (emi/incA)*100); }
+            cInd = cInd * (1+investReturn) + (incA*0.2 - npsCont - (i<15?ssyCont:0)) - Math.max(0, expA - incA*0.8);
+            minCInd = Math.min(minCInd, cInd); totalNetWorthInd.push(cInd + npsVal + ssyVal);
+            incIndData.push(incA); expIndData.push(expA); eduIndData.push(eduA);
+
+            // Path B
+            let incB, expB, eduB;
+            if (i < ukRetYear) {
+                incB = ukSal * Math.pow(1.05, i) * 1.1 * GBP_TO_INR;
+                eduB = (1500*12) * Math.pow(1.04, i) * GBP_TO_INR;
+                expB = (3500*12 + 1500*12) * Math.pow(1.04, i) * GBP_TO_INR;
+                if (i === homeYearIdx) cUk -= futureHomeVal * 0.2;
+                let homeEmi = (i >= homeYearIdx && i < homeYearIdx+20) ? emi : 0;
+                expB += homeEmi; if (homeEmi) maxEmiUk = Math.max(maxEmiUk, (homeEmi/incB)*100);
+                cUk = (cUk * (1+investReturn)) + (incB - expB - npsCont - (i<15?ssyCont:0));
+            } else {
+                incB = 5000000 * Math.pow(1+salGr, i-ukRetYear) * 1.2;
+                eduB = (getEduCost(4+i, indSchBase) + getEduCost(i, indSchBase)) * Math.pow(1+eduInf, i);
+                expB = eduB + (1.1e5*12 * Math.pow(1+expInf, i));
+                if (i === homeYearIdx) cUk -= futureHomeVal * 0.2;
+                if (i >= homeYearIdx && i < homeYearIdx+20) { expB += emi; maxEmiUk = Math.max(maxEmiUk, (emi/incB)*100); }
+                cUk = cUk * (1+investReturn) + (incB*0.2 - npsCont - (i<15?ssyCont:0)) - Math.max(0, expB - incB*0.8);
+            }
+            totalEduB += eduB; minCUk = Math.min(minCUk, cUk); totalNetWorthUk.push(cUk + npsVal + ssyVal);
+            incUkData.push(incB); expUkData.push(expB); eduUkData.push(eduB);
+        }
+
+        // UI Updates
+        document.getElementById('val-status-ind').innerText = minCInd < 0 ? 'Deficit' : 'Safe';
+        document.getElementById('box1-ind').className = minCInd < 0 ? 'mini-metric danger' : 'mini-metric success';
+        document.getElementById('val-emi-ind').innerText = maxEmiInd.toFixed(1) + "%";
+        document.getElementById('val-nw-ind').innerText = formatCrLakh(totalNetWorthInd[25]);
+
+        document.getElementById('val-status-uk').innerText = minCUk < 0 ? 'Deficit' : 'Safe';
+        document.getElementById('box1-uk').className = minCUk < 0 ? 'mini-metric danger' : 'mini-metric success';
+        document.getElementById('val-emi-uk').innerText = maxEmiUk.toFixed(1) + "%";
+        document.getElementById('val-nw-uk').innerText = formatCrLakh(totalNetWorthUk[25]);
+
+        document.getElementById('tbl-edu-ind').innerText = formatCrLakh(totalEduA);
+        document.getElementById('tbl-edu-uk').innerText = formatCrLakh(totalEduB);
+        document.getElementById('tbl-low-ind').innerText = formatCrLakh(minCInd);
+        document.getElementById('tbl-low-uk').innerText = formatCrLakh(minCUk);
+
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Ind Net Worth', data: totalNetWorthInd, borderColor: '#0ea5e9', yAxisID: 'y1' },
+                    { label: 'UK Net Worth', data: totalNetWorthUk, borderColor: '#8b5cf6', yAxisID: 'y1' },
+                    { label: 'NPS (Locked)', data: npsLine, borderColor: '#f97316', borderDash: [5,5], yAxisID: 'y1' },
+                    { label: 'SSY (Locked)', data: ssyLine, borderColor: '#ec4899', borderDash: [5,5], yAxisID: 'y1' },
+                    { label: 'Ind Expense', data: expIndData, borderColor: '#ef4444', yAxisID: 'y' },
+                    { label: 'UK Expense', data: expUkData, borderColor: '#f87171', borderDash: [4,4], yAxisID: 'y' },
+                    { label: 'Ind Edu Cost', data: eduIndData, borderColor: '#f59e0b', yAxisID: 'y' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { 
+                    y: { position: 'left', title: {display:true, text:'Cash Flow'}}, 
+                    y1: { position: 'right', grid: {drawOnChartArea:false}, title:{display:true, text:'Wealth'}}
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
