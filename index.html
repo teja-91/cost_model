@@ -162,25 +162,26 @@
 <div id="protected-content">
     <div class="container">
         <div class="intro-header">
-            <h1>The Master Financial Plan v4.5</h1>
-            <p>Granular 26-year simulation including Bonus modeling and Lifecycle Matrix tracking.</p>
+            <h1>The Master Financial Plan v4.6</h1>
+            <p>Unified cross-border investment model: Remitting UK surplus to Indian vehicles.</p>
         </div>
 
         <div class="guide-section">
             <div class="guide-grid">
                 <div class="guide-col">
                     <h3>Purpose & Assumptions</h3>
-                    <p>Evaluates Path A (India Only) vs Path B (UK Stint) regarding premium International schooling and housing.</p>
+                    <p>This model simulates remitting 100% of UK savings back to India to compound at Indian market rates (e.g. 12% Mutual Funds).</p>
                     <ul>
-                        <li><strong>The 20% Rule:</strong> 20% of post-tax income is invested. If expenses exceed the remaining 80%, Liquid Investments are raided.</li>
+                        <li><strong>Cross-Border Compounding:</strong> UK surplus is converted to INR annually and invested in the Indian Liquid Corpus.</li>
+                        <li><strong>The 20% Rule (India Phase):</strong> In India, 20% of income is invested. If expenses exceed the other 80%, Liquid Investments are raided.</li>
                         <li><strong>Housing:</strong> 20% Deposit in Target Year, 80% Loan at 8.5% over 20 years.</li>
                     </ul>
                 </div>
                 <div class="guide-col">
                     <h3>Visualization Guide</h3>
-                    <p><strong>Red Line:</strong> Yearly expenses (spikes at home purchase).<br>
-                    <strong>Dashed Lines:</strong> Represent Path B (UK) trajectory.<br>
-                    <strong>Locked Lines:</strong> NPS and SSY wealth (not usable for liquidity deficits).</p>
+                    <p><strong>Purple Path B:</strong> Shows the trajectory of using GBP as an investment engine for Indian assets.<br>
+                    <strong>Locked Lines:</strong> NPS and SSY wealth (Indian vehicles funded by both paths).<br>
+                    <strong>Liquidity Check:</strong> If the liquid bank balance hits zero, status turns to <strong>Deficit</strong>.</p>
                 </div>
             </div>
         </div>
@@ -291,7 +292,7 @@
                             <td id="tbl-cov-uk">-</td>
                         </tr>
                         <tr>
-                            <td id="tbl-launch-label">Launchpad Corpus (Year 3)</td>
+                            <td id="tbl-launch-label">Launchpad Corpus (Year X)</td>
                             <td id="tbl-launch-ind" class="td-ind">-</td>
                             <td id="tbl-launch-uk" class="td-uk">-</td>
                         </tr>
@@ -395,14 +396,17 @@
             // Path B
             let incB, costB, eduB;
             if (i < ukRetYear) {
+                // UK Phase
                 incB = ukSal * Math.pow(1.05, i) * (1+ukBonus) * GBP_TO_INR;
                 eduB = (1500*12) * Math.pow(1.04, i) * GBP_TO_INR;
                 costB = (3500*12 + 1500*12) * Math.pow(1.04, i) * GBP_TO_INR;
                 if (i === homeYearIdx) cUk -= futureHomeVal * 0.2;
                 let hEmi = (i >= homeYearIdx && i < homeYearIdx+20) ? emi : 0;
                 costB += hEmi; if (hEmi) maxEUk = Math.max(maxEUk, (hEmi/incB)*100);
+                // Unified Investment: Remitting all surplus to Indian Liquid Corpus compounding at investReturn
                 cUk = (cUk * (1+investReturn)) + (incB - costB - npsCont - (i<15?ssyCont:0));
             } else {
+                // India Return Phase
                 incB = 5000000 * Math.pow(1+salGr, i-ukRetYear) * (1+indBonus);
                 eduB = (getEduCost(4+i, indSchBase) + getEduCost(i, indSchBase)) * Math.pow(1+eduInf, i);
                 costB = eduB + (1.1e5*12 * Math.pow(1.07, i));
@@ -429,10 +433,8 @@
         document.getElementById('tbl-final-ind').innerText = formatCrLakh(nwInd[25]);
         document.getElementById('tbl-final-uk').innerText = formatCrLakh(nwUk[25]);
 
-        const covInd = document.getElementById('tbl-cov-ind');
-        covInd.innerHTML = minCInd < 0 ? '<span class="badge danger">Shortfall Risk</span>' : '<span class="badge success">Fully Covered</span>';
-        const covUk = document.getElementById('tbl-cov-uk');
-        covUk.innerHTML = minCUk < 0 ? '<span class="badge danger">Shortfall Risk</span>' : '<span class="badge success">Fully Covered</span>';
+        document.getElementById('tbl-cov-ind').innerHTML = minCInd < 0 ? '<span class="badge danger">Shortfall Risk</span>' : '<span class="badge success">Fully Covered</span>';
+        document.getElementById('tbl-cov-uk').innerHTML = minCUk < 0 ? '<span class="badge danger">Shortfall Risk</span>' : '<span class="badge success">Fully Covered</span>';
 
         // Boxes UI
         document.getElementById('val-status-ind').innerText = minCInd < 0 ? 'Deficit' : 'Safe';
